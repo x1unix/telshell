@@ -1,6 +1,11 @@
 package telshell
 
-import "github.com/x1unix/telshell/internal/app"
+import (
+	"context"
+	"github.com/x1unix/telshell/internal/app"
+	"os/exec"
+	"strings"
+)
 
 var (
 	DefaultShell = "cmd.exe"

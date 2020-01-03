@@ -8,4 +8,8 @@ run:
 
 .PHONY: build
 build:
-	@go build -o ./build/telshell $(PKG)
+	@GOOS=darwin go build -o ./build/telshell_darwin $(PKG)
+	@GOOS=windows go build -o ./build/telshell_win-amd64 $(PKG)
+	@GOOS=windows GOARCH=386 go build -o ./build/telshell_win-i386 $(PKG)
+	@GOOS=linux GOARCH=amd64 go build -o ./build/telshell_linux-amd64 $(PKG)
+	@GOOS=linux GOARCH=386 go build -o ./build/telshell_linux-386 $(PKG)
