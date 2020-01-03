@@ -16,10 +16,11 @@ var (
 	ErrServerNotStarted = errors.New("server not started")
 )
 
+// Server is telnet server used for serving requests
 type Server struct {
-	log     *zap.SugaredLogger
-	handler Handler
-	ln      net.Listener
+	log      *zap.SugaredLogger
+	handlers []Handler
+	ln       net.Listener
 
 	running bool
 	runLock sync.RWMutex
@@ -28,17 +29,22 @@ type Server struct {
 	cancelFn context.CancelFunc
 }
 
-func NewServer(handler Handler) *Server {
+// NewServer creates new server with specified handlers.
+//
+// Each handler executes one by one for each new connection
+func NewServer(handlers ...Handler) *Server {
 	return &Server{
-		handler: handler,
-		log:     zap.S().Named("server"),
+		handlers: handlers,
+		log:      zap.S().Named("server"),
 	}
 }
 
+// SetLogger sets logger
 func (s *Server) SetLogger(l *zap.Logger) {
 	s.log = l.Sugar()
 }
 
+// Start starts server
 func (s *Server) Start(ctx context.Context, addr string) (err error) {
 	if err := s.checkRunState(true); err != nil {
 		return err
@@ -120,11 +126,13 @@ func (s *Server) handle(conn net.Conn) {
 	}()
 
 	s.log.Debugf("%q: received new connection", conn.RemoteAddr().String())
-	fmt.Fprintln(conn, "Wellcome to TelShell :)\r\n")
 
-	if err := s.handler.Handle(s.ctx, conn); err != nil {
-		s.log.Errorf("handler returned an error: %s", err)
-		fmt.Fprintf(conn, "ERROR:\t%s\r\n", err.Error())
+	// Execute each handler
+	for _, handler := range s.handlers {
+		if err := handler.Handle(s.ctx, conn); err != nil {
+			s.log.Errorf("handler returned an error: %s", err)
+			fmt.Fprintf(conn, "ERROR:\t%s\r\n", err.Error())
+		}
 	}
 
 	// Close connection if wasn't closed
@@ -141,6 +149,7 @@ func (s *Server) shutdown() error {
 	return nil
 }
 
+// Stop stops the server
 func (s *Server) Stop() error {
 	if err := s.checkRunState(false); err != nil {
 		return err

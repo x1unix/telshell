@@ -9,14 +9,14 @@ import (
 )
 
 const (
-	charCr = 0xD
+	charCr  = 0xD
 	charNul = 0x0
 )
 
 type TerminalWrapper struct {
 	buffSize int
-	client io.ReadWriter
-	log *zap.SugaredLogger
+	client   io.ReadWriter
+	log      *zap.SugaredLogger
 }
 
 func NewTerminalWrapper(log *zap.SugaredLogger, client io.ReadWriter, buffSize int) TerminalWrapper {
@@ -91,7 +91,7 @@ func (w TerminalWrapper) filterChars(msg []byte) []byte {
 	filtered := make([]byte, 0, len(msg))
 	for _, b := range msg {
 		switch b {
-		case charCr, charNul:
+		case CR, NulChar:
 			continue
 		default:
 		}
