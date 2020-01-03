@@ -2,9 +2,11 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"github.com/x1unix/telshell"
 	"github.com/x1unix/telshell/internal/app"
 	"go.uber.org/zap"
+	"os"
 )
 
 func init() {
@@ -35,7 +37,13 @@ func main() {
 	flag.IntVar(&params.bufferSize, "buffer", 64, "Buffer size")
 	flag.Var(&params.shellArgs, "s", "Shell args")
 
+	flag.Usage = func() {
+		fmt.Println("TelShell - Simple telnet shell server")
+		fmt.Printf("\nUsage of %s:\n", os.Args[0])
+		flag.PrintDefaults()
+	}
 	flag.Parse()
+
 	if err := start(params); err != nil {
 		zap.S().Fatal(err)
 	}
