@@ -8,11 +8,6 @@ import (
 	"os/exec"
 )
 
-const (
-	charCr  = 0xD
-	charNul = 0x0
-)
-
 type TerminalWrapper struct {
 	buffSize int
 	client   io.ReadWriter
@@ -81,9 +76,8 @@ func (w TerminalWrapper) writeToHost(ctx context.Context, dest io.Writer) {
 			continue
 		}
 
-		//w.log.Infof("got data (%d bytes):\n%s", c, helpers.BytesToMessage(arr))
-		filtered := w.filterChars(arr)
-		dest.Write(filtered)
+		arr = w.filterChars(arr)
+		dest.Write(arr)
 	}
 }
 

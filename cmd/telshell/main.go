@@ -16,29 +16,41 @@ func init() {
 	zap.ReplaceGlobals(l)
 }
 
+type startupParams struct {
+	addr       string
+	shell      string
+	shellArgs  app.FlagsArray
+	withAuth   bool
+	bufferSize int
+}
+
 func main() {
-	shellFlags := telshell.ShellArgs[:]
-	addr := flag.String("addr", ":1000", "Address to listen")
-	withAuth := flag.Bool("auth", false, "Require authorization")
-	shell := flag.String("shell", telshell.DefaultShell, "Define shell argument")
-	flag.Var(&shellFlags, "s", "Shell args")
+	params := startupParams{
+		shellArgs: telshell.ShellArgs[:],
+	}
+
+	flag.StringVar(&params.addr, "addr", ":1000", "Address to listen")
+	flag.BoolVar(&params.withAuth, "auth", false, "Require authorization")
+	flag.StringVar(&params.shell, "shell", telshell.DefaultShell, "Define shell argument")
+	flag.IntVar(&params.bufferSize, "buffer", 64, "Buffer size")
+	flag.Var(&params.shellArgs, "s", "Shell args")
 
 	flag.Parse()
-	if err := start(*addr, *shell, *withAuth, shellFlags); err != nil {
+	if err := start(params); err != nil {
 		zap.S().Fatal(err)
 	}
 }
 
-func start(addr, shell string, withAuth bool, shellArgs []string) error {
+func start(p startupParams) error {
 	ctx, _ := app.GetApplicationContext()
 	var h telshell.Handler
-	if withAuth {
-		zap.L().Info("shell auth enabled")
-		h = telshell.NewAuthShellHandler(shell, shellArgs...)
+	if p.withAuth {
+		zap.S().Infof("shell auth enabled, shell is %q", p.shell)
+		h = telshell.NewAuthShellHandler(p.bufferSize, p.shell, p.shellArgs...)
 	} else {
-		zap.S().Infof("shell auth disabled, shell is %q", shell)
-		h = telshell.NewShellHandler(shell, shellArgs...)
+		zap.S().Infof("shell auth disabled, shell is %q", p.shell)
+		h = telshell.NewShellHandler(p.bufferSize, p.shell, p.shellArgs...)
 	}
 	srv := telshell.NewServer(telshell.WelcomeHandler{}, h)
-	return srv.Start(ctx, addr)
+	return srv.Start(ctx, p.addr)
 }
