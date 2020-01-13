@@ -88,7 +88,7 @@ func (s *Server) markRunState(isRunning bool) {
 func (s *Server) listen() error {
 	go func() {
 		<-s.ctx.Done()
-		s.log.Info("context is dead, closing server")
+		s.log.Info("closing server...")
 		if err := s.shutdown(); err != nil {
 			s.log.Error(err)
 		}
