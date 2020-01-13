@@ -2,8 +2,6 @@
 PKG_URL="github.com/x1unix/telshell"
 URL_DOWNLOAD_PREFIX="https://${PKG_URL}/releases/latest/download"
 ISSUE_URL="https://${PKG_URL}/issues"
-NIL="nil"
-PATH="${PATH}"
 
 RED="\033[0;31m"
 GREEN='\033[0;32m'
@@ -16,60 +14,57 @@ warn() {
 
 panic() {
     printf "${RED}ERROR: ${1}${NC}\n" >&2
-    printf "${RED}Installation Failed${NC}\n"
+    printf "${RED}\nIf you feel that this is an installer issue, you may submit an issue on ${ISSUE_URL}\nInstallation failed. ${NC}\n"
     exit 1
 }
 
 get_bin_name() {
     os=$(uname -s | awk '{print tolower($0)}')
     arc=$(get_arch)
-    if [ "${arc}" = "${NIL}" ]; then
-        echo "${NIL}"
-    else
-        echo "telshell_${os}-${arc}"
-    fi
+    echo "telshell_${os}-${arc}"
 }
 
 get_arch() {
     a=$(uname -m)
     case ${a} in
     "x86_64" | "amd64" )
-        echo "amd64"
-        ;;
+      echo "amd64"
+      ;;
     "i386" | "i486" | "i586")
-        echo "i386"
-        ;;
-    "aarch64")
-      echo "arm64"
+      echo "i386"
       ;;
     *)
-        echo ${NIL}
-        ;;
+      echo $a
+      ;;
     esac
 }
 
 
 main() {
-    local gb_name=$(get_bin_name)
-    if [ "$gb_name" = "$NIL" ]; then
-        sys_label="$(uname -s) $(uname -m)"
-        panic "No prebuilt binaries available for ${sys_label}, try to check out release for your platform at https://${PKG_URL}/releases"
-    fi
-
-    local download_dir="${HOME}/bin"
+    file_name=$(get_bin_name)
+    download_dir="${HOME}/bin"
     mkdir -p ${download_dir}
 
-    local dest_file="${download_dir}/telshell"
-    local lnk=${URL_DOWNLOAD_PREFIX}/${gb_name}
-    echo "-> Downloading '${lnk}'..."
-    if ! curl -sS -L -o "${dest_file}" ${lnk}; then
-        panic "Installation failed, failed to download binary"
-    fi
+    dest_file="${download_dir}/telshell"
+    download_url=${URL_DOWNLOAD_PREFIX}/${file_name}
+    echo "-> Downloading '${download_url}'..."
 
-    chmod +x ${dest_file}
-    echo "-> Successfully installed to '${dest_file}'"
-    printf "${GREEN}Done!${NC}\n"
-    exit 0
+    http_status=$(curl --fail --write-out "%{http_code}" -L --show-error --progress -o ${dest_file} ${download_url})
+    case ${http_status} in
+    "200")
+      chmod +x ${dest_file}
+      echo "-> Successfully installed to '${dest_file}'"
+      printf "${GREEN}Done!${NC}\n"
+      exit 0
+      ;;
+    "404")
+      sys_label="$(uname -s) $(uname -m)"
+      panic "No prebuilt binaries available for ${sys_label}, try to check out release for your platform at https://${PKG_URL}/releases"
+      ;;
+    *)
+      panic "Installation failed, failed to download binary (HTTP error ${http_status})"
+      ;;
+    esac
 }
 
 main
