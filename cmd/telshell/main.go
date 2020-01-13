@@ -10,6 +10,8 @@ import (
 	"go.uber.org/zap"
 )
 
+const version = "1.1.0"
+
 func init() {
 	l, err := zap.NewDevelopment()
 	if err != nil {
@@ -44,12 +46,13 @@ func main() {
 	flag.BoolVar(&params.withAuth, "auth", false, "Require authorization")
 	flag.StringVar(&params.shell, "shell", telshell.DefaultShell, "Define shell argument")
 	flag.IntVar(&params.bufferSize, "buffer", 64, "Buffer size")
-	flag.Var(&params.shellArgs, "s", "Shell args")
+	flag.Var(&params.shellArgs, "s", "Define shell argument")
 	flag.BoolVar(&params.replaceLineEndings, "replaceLineEndings", true,
 		"Replace UNIX (\\n) with DOS (\\r\\n) line endings")
 
 	flag.Usage = func() {
-		fmt.Println("TelShell - Simple telnet shell server")
+		fmt.Println("TelShell, version", version)
+		fmt.Println("Simple telnet shell server")
 		fmt.Printf("\nUsage of %s:\n", os.Args[0])
 		flag.PrintDefaults()
 	}
