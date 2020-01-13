@@ -12,22 +12,14 @@ import (
 
 const version = "1.1.0"
 
-func init() {
-	l, err := zap.NewDevelopment()
-	if err != nil {
-		panic(err)
-	}
-
-	zap.ReplaceGlobals(l)
-}
-
 type startupParams struct {
+	debug              bool
+	withAuth           bool
+	replaceLineEndings bool
+	bufferSize         int
 	addr               string
 	shell              string
 	shellArgs          app.FlagsArray
-	withAuth           bool
-	bufferSize         int
-	replaceLineEndings bool
 }
 
 func (s startupParams) ioParams() telshell.IOParams {
@@ -37,6 +29,19 @@ func (s startupParams) ioParams() telshell.IOParams {
 	}
 }
 
+func (s startupParams) getLogger() (*zap.Logger, error) {
+	if s.debug {
+		return zap.NewDevelopment()
+	}
+
+	// Disable stacktrace and caller
+	cfg := zap.NewDevelopmentConfig()
+	cfg.EncoderConfig.CallerKey = ""
+	cfg.EncoderConfig.NameKey = ""
+	cfg.EncoderConfig.StacktraceKey = ""
+	return cfg.Build()
+}
+
 func main() {
 	params := startupParams{
 		shellArgs: telshell.ShellArgs[:],
@@ -44,6 +49,7 @@ func main() {
 
 	flag.StringVar(&params.addr, "addr", ":1000", "Address to listen")
 	flag.BoolVar(&params.withAuth, "auth", false, "Require authorization")
+	flag.BoolVar(&params.debug, "debug", false, "Enable debug mode")
 	flag.StringVar(&params.shell, "shell", telshell.DefaultShell, "Define shell argument")
 	flag.IntVar(&params.bufferSize, "buffer", 64, "Buffer size")
 	flag.Var(&params.shellArgs, "s", "Define shell argument")
@@ -58,6 +64,15 @@ func main() {
 	}
 	flag.Parse()
 
+	// Initialize logger
+	l, err := params.getLogger()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	zap.ReplaceGlobals(l)
+	defer l.Sync()
 	if err := start(params); err != nil {
 		zap.S().Fatal(err)
 	}
