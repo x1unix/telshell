@@ -55,7 +55,7 @@ main() {
     local download_dir="${HOME}/bin"
     mkdir -p ${download_dir}
 
-    local dest_file="${download_dir}/gilbert"
+    local dest_file="${download_dir}/telshell"
     local lnk=${URL_DOWNLOAD_PREFIX}/${gb_name}
     echo "-> Downloading '${lnk}'..."
     if ! curl -sS -L -o "${dest_file}" ${lnk}; then
