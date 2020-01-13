@@ -1,5 +1,5 @@
 #!/bin/sh
-PKG_URL="https://github.com/x1unix/telshell"
+PKG_URL="github.com/x1unix/telshell"
 URL_DOWNLOAD_PREFIX="https://${PKG_URL}/releases/latest/download"
 ISSUE_URL="https://${PKG_URL}/issues"
 NIL="nil"
