@@ -52,7 +52,8 @@ get_arch() {
 main() {
     local gb_name=$(get_bin_name)
     if [ "$gb_name" = "$NIL" ]; then
-        panic "No prebuilt binaries available, try to check out release for your platform at https://${PKG_URL}/releases"
+        sys_label="$(uname -s) $(uname -m)"
+        panic "No prebuilt binaries available for ${sys_label}, try to check out release for your platform at https://${PKG_URL}/releases"
     fi
 
     local download_dir="${HOME}/bin"
