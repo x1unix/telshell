@@ -6,7 +6,11 @@ Tiny Telnet shell server in Go
 
 ## Download
 
-Grab latest release from [here](https://github.com/x1unix/telshell/releases/latest)
+```bash
+curl https://raw.githubusercontent.com/x1unix/telshell/master/install.sh | sh
+```
+
+Also, you can grab latest release from [here](https://github.com/x1unix/telshell/releases/latest)
 
 ## Usage
 
