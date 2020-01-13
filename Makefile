@@ -10,7 +10,7 @@ $(shell GOOS=$(1) GOARCH=$(2) go build -o $(BUILD_DIR)/telshell_$(3) $(PKG))
 endef
 
 .PHONY:build
-build: clean build-linux build-darwin build-win32
+build: clean linux darwin windows
 
 .PHONY: run
 run:
