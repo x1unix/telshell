@@ -1,21 +1,28 @@
 package telshell
 
 import (
+	"bytes"
 	"context"
-	"github.com/x1unix/telshell/internal/helpers"
-	"go.uber.org/zap"
 	"io"
 	"os/exec"
+
+	"github.com/x1unix/telshell/internal/helpers"
+	"go.uber.org/zap"
 )
 
-type TerminalWrapper struct {
-	buffSize int
-	client   io.ReadWriter
-	log      *zap.SugaredLogger
+type IOParams struct {
+	BufferSize         uint
+	ReplaceLineEndings bool
 }
 
-func NewTerminalWrapper(log *zap.SugaredLogger, client io.ReadWriter, buffSize int) TerminalWrapper {
-	return TerminalWrapper{client: client, log: log, buffSize: buffSize}
+type TerminalWrapper struct {
+	IOParams
+	client io.ReadWriter
+	log    *zap.SugaredLogger
+}
+
+func NewTerminalWrapper(log *zap.SugaredLogger, client io.ReadWriter, params IOParams) TerminalWrapper {
+	return TerminalWrapper{client: client, log: log, IOParams: params}
 }
 
 func (w TerminalWrapper) Listen(ctx context.Context, cmd *exec.Cmd) error {
@@ -53,8 +60,14 @@ func (w TerminalWrapper) readFromHost(ctx context.Context, r io.Reader) {
 		default:
 		}
 
-		buff := make([]byte, w.buffSize)
+		buff := make([]byte, w.BufferSize)
 		_, _ = r.Read(buff)
+
+		if w.ReplaceLineEndings {
+			// Replace RF with CRLF line endings
+			buff = bytes.ReplaceAll(buff, []byte("\n"), []byte{CL, RF})
+		}
+
 		w.client.Write(buff)
 	}
 }
@@ -66,7 +79,7 @@ func (w TerminalWrapper) writeToHost(ctx context.Context, dest io.Writer) {
 			return
 		default:
 		}
-		arr := make([]byte, w.buffSize)
+		arr := make([]byte, w.BufferSize)
 		_, err := w.client.Read(arr)
 		if err == io.EOF || helpers.IsErrClosing(err) {
 			return
@@ -85,7 +98,7 @@ func (w TerminalWrapper) filterChars(msg []byte) []byte {
 	filtered := make([]byte, 0, len(msg))
 	for _, b := range msg {
 		switch b {
-		case CR, NulChar:
+		case CL, NulChar:
 			continue
 		default:
 		}

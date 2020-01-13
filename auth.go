@@ -17,18 +17,18 @@ var nameRegex = regexp.MustCompile(`(?m)^[A-Za-z0-9\.\-\_]+$`)
 
 // AuthShellHandler is shell handler that requires username and password
 type AuthShellHandler struct {
-	buffSize  int
+	IOParams
 	shellPath string
 	shellArgs []string
 	log       *zap.SugaredLogger
 }
 
 // NewAuthShellHandler creates new authorized shell handler
-func NewAuthShellHandler(buffSize int, shell string, args ...string) AuthShellHandler {
+func NewAuthShellHandler(params IOParams, shell string, args ...string) AuthShellHandler {
 	return AuthShellHandler{
+		IOParams:  params,
 		shellPath: shell,
 		shellArgs: args,
-		buffSize:  buffSize,
 		log:       zap.S().Named("auth_shell"),
 	}
 }
@@ -55,7 +55,7 @@ func (h AuthShellHandler) Handle(ctx context.Context, rw io.ReadWriter) error {
 
 func (h AuthShellHandler) startUserShell(ctx context.Context, user string, rw io.ReadWriter) error {
 	wrapCtx, cancelFn := context.WithCancel(ctx)
-	wrapper := NewTerminalWrapper(h.log, rw, h.buffSize)
+	wrapper := NewTerminalWrapper(h.log, rw, h.IOParams)
 	cmd := runShellAs(ctx, user, h.shellPath, h.shellArgs...)
 	cmd.Env = os.Environ()
 	if err := wrapper.Listen(wrapCtx, cmd); err != nil {

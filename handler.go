@@ -18,18 +18,18 @@ type Handler interface {
 
 // ShellHandler provides shell access via Telnet
 type ShellHandler struct {
-	buffSize  int
+	ioParams  IOParams
 	shellPath string
 	shellArgs []string
 	log       *zap.SugaredLogger
 }
 
 // NewShellHandler creates a new shell handler
-func NewShellHandler(buffSize int, shell string, args ...string) ShellHandler {
+func NewShellHandler(params IOParams, shell string, args ...string) ShellHandler {
 	return ShellHandler{
 		shellPath: shell,
 		shellArgs: args,
-		buffSize:  buffSize,
+		ioParams:  params,
 		log:       zap.S().Named("shell"),
 	}
 }
@@ -39,7 +39,7 @@ func (s ShellHandler) Handle(ctx context.Context, rw io.ReadWriter) error {
 	fmt.Fprintf(rw, "Current shell is %q\n", s.shellPath)
 
 	wrapCtx, cancelFn := context.WithCancel(ctx)
-	wrapper := NewTerminalWrapper(s.log, rw, s.buffSize)
+	wrapper := NewTerminalWrapper(s.log, rw, s.ioParams)
 	cmd := exec.CommandContext(ctx, s.shellPath, s.shellArgs...)
 	cmd.Env = os.Environ()
 	if err := wrapper.Listen(wrapCtx, cmd); err != nil {

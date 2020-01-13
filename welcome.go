@@ -20,8 +20,13 @@ func (h WelcomeHandler) Handle(_ context.Context, rw io.ReadWriter) error {
 
 	banner := fmt.Sprintf("#  Wellcome to TelShell on %s (%s)  #", hostname, runtime.GOOS)
 	decorations := strings.Repeat("#", len(banner))
-	fmt.Fprintln(rw, "\n"+decorations)
-	fmt.Fprintln(rw, banner)
-	fmt.Fprintln(rw, decorations+"\n")
+	tprintln(rw, CLRF+decorations)
+	tprintln(rw, banner)
+	tprintln(rw, decorations+CLRF)
 	return nil
+}
+
+// tprintln prints message with DOS line endings
+func tprintln(rw io.ReadWriter, msg string) {
+	fmt.Fprint(rw, msg+"\r\n")
 }
