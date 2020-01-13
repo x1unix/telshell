@@ -11,7 +11,7 @@ import (
 
 var (
 	DefaultShell = "/bin/sh"
-	ShellArgs    = app.FlagsArray{"-i"}
+	ShellArgs    = app.FlagsArray{}
 )
 
 func runShellAs(ctx context.Context, username, shell string, shellArgs ...string) *exec.Cmd {
