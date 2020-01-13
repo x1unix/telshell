@@ -20,17 +20,17 @@ run:
 clean:
 	@echo "- Clean build directory" && rm -rf $(BUILD_DIR)
 
-.PHONY:build-win32
-build-win32:
+.PHONY:windows
+windows:
 	$(call go_build,windows,amd64,windows-amd64.exe)
 	$(call go_build,windows,386,windows-i386.exe)
 
-.PHONY:build-linux
-build-linux:
+.PHONY:linux
+linux:
 	$(call go_build,linux,amd64,linux-amd64)
 	$(call go_build,linux,386,linux-i386)
 	$(call go_build,linux,arm64,linux-aarch64)
 
-.PHONY: build-darwin
-build-darwin:
+.PHONY: darwin
+darwin:
 	$(call go_build,darwin,amd64,darwin-amd64)
