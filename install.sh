@@ -59,8 +59,7 @@ main() {
     local lnk=${URL_DOWNLOAD_PREFIX}/${gb_name}
     echo "-> Downloading '${lnk}'..."
     if ! curl -sS -L -o "${dest_file}" ${lnk}; then
-        warn "Installation failed, failed to download binary"
-        exit 1
+        panic "Installation failed, failed to download binary"
     fi
 
     chmod +x ${dest_file}
