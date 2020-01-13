@@ -39,6 +39,9 @@ get_arch() {
     "i386" | "i486" | "i586")
         echo "i386"
         ;;
+    "aarch64")
+      echo "arm64"
+      ;;
     *)
         echo ${NIL}
         ;;
