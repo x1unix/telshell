@@ -14,9 +14,4 @@ Grab latest release from [here](https://github.com/x1unix/telshell/releases/late
 ./telshell -listen=:5000
 ```
 
-**Optional arguments:**
-
-* `shell` - Login shell
-* `-s` - Set login shell parameter (e.g. `-s=-r` for restricted shell)
-* `-buffer` - TCP connection read buffer size
-* `-auth` - Require authorization (experimental)
+Use `-help` to get help about additional params
