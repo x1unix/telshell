@@ -23,13 +23,14 @@ get_bin_name() {
     case $os in
     cygwin*|mingw32*|msys*|mingw*)
       os=windows
+      file_suffix=.exe
       ;;
     *)
       ;;
     esac
 
     arc=$(get_arch)
-    echo "telshell_${os}-${arc}"
+    echo "telshell_${os}-${arc}${file_suffix}"
 }
 
 get_arch() {
