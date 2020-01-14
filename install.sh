@@ -34,11 +34,13 @@ is_windows() {
 
 get_download_url() {
     arc=$(get_arch)
+    os="$OS"
 
     if is_windows; then
-      file_suffix=.exe
+      file_suffix=.exe  # Set .exe as executable suffix
+      os=windows        # Override os to Windows for MinGW, MSYS, etc
     fi
-    echo "${URL_DOWNLOAD_PREFIX}/telshell_${OS}-${arc}${file_suffix}"
+    echo "${URL_DOWNLOAD_PREFIX}/telshell_${os}-${arc}${file_suffix}"
 }
 
 get_arch() {
