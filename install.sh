@@ -20,6 +20,14 @@ panic() {
 
 get_bin_name() {
     os=$(uname -s | awk '{print tolower($0)}')
+    case $os in
+    cygwin*|mingw32*|msys*|mingw*)
+      os=windows
+      ;;
+    *)
+      ;;
+    esac
+
     arc=$(get_arch)
     echo "telshell_${os}-${arc}"
 }
@@ -30,7 +38,7 @@ get_arch() {
     "x86_64" | "amd64" )
       echo "amd64"
       ;;
-    "i386" | "i486" | "i586")
+    "i386" | "i486" | "i586" | "i686")
       echo "i386"
       ;;
     *)
