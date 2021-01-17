@@ -18,7 +18,7 @@ func (h WelcomeHandler) Handle(_ context.Context, rw io.ReadWriter) error {
 		return err
 	}
 
-	banner := fmt.Sprintf("#  Wellcome to TelShell on %s (%s)  #", hostname, runtime.GOOS)
+	banner := fmt.Sprintf("#  Welcome to TelShell on %s (%s)  #", hostname, runtime.GOOS)
 	decorations := strings.Repeat("#", len(banner))
 	tprintln(rw, CLRF+decorations)
 	tprintln(rw, banner)
